@@ -463,16 +463,16 @@ class _HomeSearchViewState extends State<HomeSearchView> {
                     height: 54,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [AppColors.primary, Color(0xFFEF5350)],
+                        colors: [AppColors.primary, AppColors.primaryLight],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: AppColors.primary.withOpacity(0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
@@ -528,16 +528,16 @@ class _HomeSearchViewState extends State<HomeSearchView> {
                   title: 'Weekend Cashback',
                   code: 'WEEKEND30',
                   desc: 'Get 30% cashback on weekend trips',
-                  color: const Color(0xFF1B2C24),
-                  accentColor: const Color(0xFF2EC4B6),
+                  color: const Color(0xFF0F1E36),
+                  accentColor: AppColors.primaryLight,
                 ),
                 const SizedBox(width: 16),
                 _buildOfferCard(
                   title: 'New User Discount',
                   code: 'FIRSTCLASS',
                   desc: 'Save ₹150 on your first premium booking',
-                  color: const Color(0xFF352028),
-                  accentColor: AppColors.primaryLight,
+                  color: const Color(0xFF1A152E),
+                  accentColor: AppColors.secondary,
                 ),
               ],
             ),
@@ -591,12 +591,26 @@ class _HomeSearchViewState extends State<HomeSearchView> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.background,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.outline),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.outline, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primaryLight, size: 20),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: AppColors.primaryLight, size: 18),
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -606,14 +620,15 @@ class _HomeSearchViewState extends State<HomeSearchView> {
                     label,
                     style: GoogleFonts.manrope(
                       fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryLight.withOpacity(0.8),
+                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: GoogleFonts.manrope(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -641,7 +656,14 @@ class _HomeSearchViewState extends State<HomeSearchView> {
       width: 260,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color,
+        gradient: LinearGradient(
+          colors: [
+            color,
+            color.withOpacity(0.55),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: accentColor.withOpacity(0.3)),
       ),
