@@ -1,163 +1,58 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'trip_history.dart';
+import '../booking_manager.dart';
+import '../theme/colors.dart';
+import 'home_dashboard.dart';
 
 class BookingConfirmedScreen extends StatelessWidget {
   const BookingConfirmedScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Read the most recent booking dynamically
+    final booking = BookingManager.bookings.isNotEmpty
+        ? BookingManager.bookings.first
+        : {
+            'pnr': 'PR-992841',
+            'from': 'Kolkata',
+            'to': 'Durgapur',
+            'date': '24 Oct 2026',
+            'departureTime': '08:30 AM',
+            'arrivalTime': '11:45 AM',
+            'duration': '3h 15m',
+            'busName': 'Volvo 9600 Gold Class',
+            'seat': 'Lower Deck, 04A',
+            'price': '₹850.00',
+            'status': 'Confirmed',
+          };
+
+    final routeText = "${booking['from']} → ${booking['to']}";
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121318), // background
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      body: Stack(
-        children: [
-          // Background Gradient & Blur Elements
-          _buildBackground(),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 24),
+              _buildSuccessHeader(),
+              const SizedBox(height: 28),
 
-          SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                top: 16,
-                bottom: 120, // Space for Bottom Nav
-                left: 24,
-                right: 24,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 64), // App bar clearance
-                  _buildSuccessHeader(),
-                  const SizedBox(height: 32),
-                  _buildTicketCard(),
-                  const SizedBox(height: 40),
-                  _buildActionGrid(),
-                  const SizedBox(height: 32),
-                  _buildSecondaryAction(context),
-                ],
-              ),
-            ),
-          ),
+              // Dynamic Ticket Card (Optimized: No BackdropFilter!)
+              _buildTicketCard(context, booking, routeText),
+              const SizedBox(height: 28),
 
-          _buildTopAppBar(context),
-          _buildBottomNavBar(context),
-        ],
-      ),
-    );
-  }
+              // CTA Action Grid
+              _buildActionGrid(context),
+              const SizedBox(height: 24),
 
-  Widget _buildBackground() {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Container(color: const Color(0xFF121318)),
-        ),
-        // Top right blur
-        Positioned(
-          top: -100,
-          right: -100,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFB3C5FF).withOpacity(0.1), // primary/10
-              boxShadow: [
-                BoxShadow(color: const Color(0xFFB3C5FF).withOpacity(0.1), blurRadius: 120),
-              ],
-            ),
-          ),
-        ),
-        // Bottom left blur
-        Positioned(
-          bottom: -50,
-          left: -50,
-          child: Container(
-            width: 250,
-            height: 250,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF00DDDD).withOpacity(0.05), // tertiary/5
-              boxShadow: [
-                BoxShadow(color: const Color(0xFF00DDDD).withOpacity(0.05), blurRadius: 100),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTopAppBar(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            height: MediaQuery.of(context).padding.top + 64,
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: 24, right: 24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF121318).withOpacity(0.8), // surface / 80
-              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
-              boxShadow: [
-                BoxShadow(color: const Color(0xFF0D2C6E).withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 1)),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF002366),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
-                      ),
-                      child: ClipOval(
-                        child: Image.network(
-                          'https://lh3.googleusercontent.com/aida-public/AB6AXuCFzE72WiBAGPAT8iyjSR5hZ2Kp7rkmFfwjDu1EiUQaW8bn4HbvqPpFiv9Us1ThOn-SRHnF9Nx9zVwLmxaCTUSzSjJftREu8j3RvPpBKoPYkpIBl3yiELn69OGZCXSgKZeOJddInET_32ilfrWlsgZTEFOAhcotueD8c4LAFkLRnqMvVmO_t8LF8xdZCWm-NMan_JLheRyLZIbewvHu5YGQJJ1KcS5YairQMufr3uxH-goGTeoluVbhnSn9sUD74_IYND_c6IXtsgJE',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'SBSTC Premium Bus',
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFB3C5FF),
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.notifications_none, color: Color(0xFFC5C6D2)),
-                    const SizedBox(width: 16),
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF343439),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.person, color: Color(0xFFB3C5FF), size: 20),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              // Secondary View History Link
+              _buildSecondaryAction(context),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
@@ -168,42 +63,36 @@ class BookingConfirmedScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 72,
+          height: 72,
           decoration: BoxDecoration(
-            color: const Color(0xFF00DDDD).withOpacity(0.2), // tertiary/20
+            color: AppColors.tertiary.withOpacity(0.15),
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00DDDD).withOpacity(0.4),
-                blurRadius: 15, // success-glow
-              ),
-            ],
+            border: Border.all(color: AppColors.tertiary.withOpacity(0.3)),
           ),
           child: const Icon(
             Icons.check_circle,
-            color: Color(0xFF00DDDD),
-            size: 48,
+            color: AppColors.tertiary,
+            size: 40,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Text(
           'Booking Confirmed',
           style: GoogleFonts.spaceGrotesk(
-            fontSize: 40,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFFB3C5FF),
-            letterSpacing: -0.8,
-            height: 1.1,
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
-          'Your luxury seat on the SBSTC Premium is secured.',
+          'Your premium bus travel is secured. Have a safe flight!',
           style: GoogleFonts.manrope(
-            fontSize: 16,
-            color: const Color(0xFFC5C6D2),
+            fontSize: 14,
+            color: AppColors.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -211,416 +100,278 @@ class BookingConfirmedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTicketCard() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Decorative Accents
-        Positioned(
-          top: -16,
-          right: -16,
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFB3C5FF).withOpacity(0.2),
-              boxShadow: [
-                BoxShadow(color: const Color(0xFFB3C5FF).withOpacity(0.2), blurRadius: 24),
-              ],
-            ),
+  Widget _buildTicketCard(BuildContext context, Map<String, dynamic> booking, String route) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.outline),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
-        ),
-        Positioned(
-          bottom: -16,
-          left: -16,
-          child: Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF00DDDD).withOpacity(0.1),
-              boxShadow: [
-                BoxShadow(color: const Color(0xFF00DDDD).withOpacity(0.1), blurRadius: 24),
-              ],
+        ],
+      ),
+      child: Column(
+        children: [
+          // Ticket Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppColors.outline)),
             ),
-          ),
-        ),
-
-        // Main Card
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(24),
-            border: Border(
-              top: BorderSide(color: Colors.white.withOpacity(0.15)),
-              left: BorderSide(color: Colors.white.withOpacity(0.15)),
-              right: BorderSide(color: Colors.white.withOpacity(0.05)),
-              bottom: BorderSide(color: Colors.white.withOpacity(0.05)),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-              child: Column(
-                children: [
-                  // Ticket Header
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BOOKING ID / PNR',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0.8,
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const SizedBox(height: 4),
+                    Text(
+                      booking['pnr'] ?? 'PR-000000',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    'CONFIRMED',
+                    style: GoogleFonts.manrope(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryLight,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Journey Details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'BOOKING ID',
-                              style: GoogleFonts.manrope(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFFFE16D), // secondary-fixed
-                                letterSpacing: 0.96,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'PR-992841',
-                              style: GoogleFonts.spaceGrotesk(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFFE3E2E8),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'DEPARTURE',
+                          style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'CLASS',
-                              style: GoogleFonts.manrope(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFFFE16D),
-                                letterSpacing: 0.96,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFDB3C).withOpacity(0.2), // secondary-container/20
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFFFDB3C).withOpacity(0.3)),
-                              ),
-                              child: Text(
-                                'FIRST CLASS',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFFFE16D),
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          booking['departureTime'] ?? '08:30',
+                          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                        Text(
+                          booking['from'] ?? 'Kolkata',
+                          style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
-                  ),
-
-                  // Journey Details
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
+                    const Icon(Icons.arrow_forward, color: AppColors.primaryLight),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'FROM',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFFC5C6D2),
-                                    letterSpacing: 0.96,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Kolkata',
-                                  style: GoogleFonts.spaceGrotesk(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFFB3C5FF),
-                                  ),
-                                ),
-                                Text(
-                                  'City Center Terminal',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    color: const Color(0xFFC5C6D2),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Icon(Icons.chevron_right, color: Color(0xFF00DDDD)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'TO',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFFC5C6D2),
-                                    letterSpacing: 0.96,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Durgapur',
-                                  style: GoogleFonts.spaceGrotesk(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFFB3C5FF),
-                                  ),
-                                ),
-                                Text(
-                                  'Premium Hub B',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    color: const Color(0xFFC5C6D2),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                        Text(
+                          'ARRIVAL',
+                          style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                         ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            border: Border.symmetric(
-                              horizontal: BorderSide(color: Colors.white.withOpacity(0.05)),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'DEPARTURE',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFC5C6D2),
-                                      letterSpacing: 0.96,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '24 Oct • 08:30 AM',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFE3E2E8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'SEAT',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFC5C6D2),
-                                      letterSpacing: 0.96,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Lower Deck, 04A',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFE3E2E8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          booking['arrivalTime'] ?? '11:45',
+                          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
                         ),
-                        const SizedBox(height: 24),
-                        // QR Section
-                        Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    width: 160,
-                                    height: 160,
-                                    alignment: Alignment.center,
-                                    child: const Icon(
-                                      Icons.qr_code_2,
-                                      size: 150,
-                                      color: Color(0xFF0D2C6E), // on-primary
-                                    ),
-                                  ),
-                                  Positioned.fill(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: const Color(0xFF00DDDD).withOpacity(0.2), width: 6),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'SCAN AT BOARDING GATE',
-                              style: GoogleFonts.manrope(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFC5C6D2),
-                                letterSpacing: 0.96,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          booking['to'] ?? 'Durgapur',
+                          style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
-                  ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(color: AppColors.outline),
+                const SizedBox(height: 12),
 
-                  // Perforated Divider
-                  SizedBox(
-                    height: 24,
-                    child: Stack(
+                // Seat & Date row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Flex(
-                                  direction: Axis.horizontal,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: List.generate(
-                                    (constraints.constrainWidth() / 10).floor(),
-                                    (index) => SizedBox(
-                                      width: 5,
-                                      height: 1,
-                                      child: DecoratedBox(decoration: BoxDecoration(color: Colors.white.withOpacity(0.2))),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                        Text(
+                          'DATE OF JOURNEY',
+                          style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                         ),
-                        Positioned(
-                          left: -12,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(
-                            width: 24,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF121318),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withOpacity(0.1)),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: -12,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(
-                            width: 24,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF121318),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withOpacity(0.1)),
-                            ),
-                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          booking['date'] ?? '24 Oct 2026',
+                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                         ),
                       ],
                     ),
-                  ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'SEAT(S)',
+                          style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          booking['seat'] ?? '04A',
+                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-                  // Ticket Footer
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF002E2E).withOpacity(0.2), // tertiary-container/20
+                // QR Code visual
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Container(
+                        width: 140,
+                        height: 140,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.qr_code_2,
+                          size: 130,
+                          color: Color(0xFF0F1015),
+                        ),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: const [
-                            Icon(Icons.wifi, color: Color(0xFF00DDDD), size: 16),
-                            SizedBox(width: 8),
-                            Icon(Icons.restaurant, color: Color(0xFF00DDDD), size: 16),
-                            SizedBox(width: 8),
-                            Icon(Icons.bolt, color: Color(0xFF00DDDD), size: 16),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'TOTAL FARE',
-                              style: GoogleFonts.manrope(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFC5C6D2),
-                                letterSpacing: 0.96,
-                              ),
-                            ),
-                            Text(
-                              '₹1,240.00',
-                              style: GoogleFonts.manrope(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF00DDDD),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    Text(
+                      'SCAN AT BOARDING GATE',
+                      style: GoogleFonts.manrope(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Ticket Card Footer (Perforated Style)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: AppColors.outline,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.wifi, color: AppColors.textSecondary, size: 16),
+                    SizedBox(width: 8),
+                    Icon(Icons.restaurant, color: AppColors.textSecondary, size: 16),
+                    SizedBox(width: 8),
+                    Icon(Icons.bolt, color: AppColors.textSecondary, size: 16),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'TOTAL FARE PAID',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      booking['price'] ?? '₹1,240.00',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionGrid(BuildContext context) {
+    return Row(
+      children: [
+        // Track Bus CTA
+        Expanded(
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: InkWell(
+              onTap: () {
+                // Navigate back to Home shell on tab index 2 (Live Tracking)
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const HomeDashboard(initialTab: 2)),
+                  (route) => false,
+                );
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.location_on, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Track Bus',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -628,84 +379,43 @@ class BookingConfirmedScreen extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildActionGrid() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF00DDDD), Color(0xFF435B9F)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00DDDD).withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.download, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Download',
-                      style: GoogleFonts.manrope(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
         const SizedBox(width: 12),
+        // Share Ticket
         Expanded(
           child: Container(
-            height: 56,
+            height: 50,
             decoration: BoxDecoration(
-              color: const Color(0xFF292A2F), // surface-container-high
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.05)),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.outline),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.share, color: Color(0xFFE3E2E8), size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Share',
-                      style: GoogleFonts.manrope(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFE3E2E8),
-                      ),
+            child: InkWell(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppColors.surface,
+                    content: Text(
+                      'Ticket shared successfully!',
+                      style: GoogleFonts.manrope(color: Colors.white),
                     ),
-                  ],
-                ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.share, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Share Pass',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -717,95 +427,27 @@ class BookingConfirmedScreen extends StatelessWidget {
   Widget _buildSecondaryAction(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TripHistoryScreen()),
+        // Navigate back to Home shell on tab index 1 (Bookings history)
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeDashboard(initialTab: 1)),
+          (route) => false,
         );
       },
       child: Container(
-        padding: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: const Color(0xFFC5C6D2).withOpacity(0.3))),
+        padding: const EdgeInsets.only(bottom: 2),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: AppColors.textSecondary, width: 1)),
         ),
         child: Text(
-          'VIEW BOOKING HISTORY',
+          'GO TO TRIP HISTORY',
           style: GoogleFonts.manrope(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFFC5C6D2),
-            letterSpacing: 1.2,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textSecondary,
+            letterSpacing: 1.0,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar(BuildContext context) {
-    return Positioned(
-      bottom: 24,
-      left: 24,
-      right: 24,
-      child: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1F24).withOpacity(0.6), // surface-container/60
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: Colors.white.withOpacity(0.15)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF00DDDD).withOpacity(0.2),
-              blurRadius: 32,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(40),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(icon: Icons.home, label: 'Home', isActive: false),
-                _buildNavItem(icon: Icons.confirmation_number, label: 'Bookings', isActive: true),
-                _buildNavItem(icon: Icons.explore, label: 'Live', isActive: false),
-                _buildNavItem(icon: Icons.person, label: 'Profile', isActive: false),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem({required IconData icon, required String label, required bool isActive}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: isActive
-              ? BoxDecoration(
-                  color: const Color(0xFF002E2E).withOpacity(0.4), // tertiary-container/40
-                  borderRadius: BorderRadius.circular(20),
-                )
-              : null,
-          child: Icon(
-            icon,
-            color: isActive ? const Color(0xFF00DDDD) : const Color(0xFFC5C6D2).withOpacity(0.7),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: isActive ? const Color(0xFF00DDDD) : const Color(0xFFC5C6D2).withOpacity(0.7),
-            letterSpacing: 0.96,
-          ),
-        ),
-      ],
     );
   }
 }

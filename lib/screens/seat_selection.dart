@@ -1,6 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../booking_manager.dart';
+import '../theme/colors.dart';
 import 'passenger_information.dart';
 
 enum SeatStatus { available, selected, booked, ladies }
@@ -21,473 +22,365 @@ class SeatSelectionScreen extends StatefulWidget {
 }
 
 class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final double _pricePerSeat = 1250.00;
+  double _pricePerSeat = 720.0;
+  bool _isSleeperBus = false;
 
-  // Manually match the layout from the HTML
-  List<SeatData?> _seatGrid = [
-    SeatData(id: '1A', label: '1A', status: SeatStatus.available),
-    SeatData(id: '1B', label: '1B', status: SeatStatus.available),
-    null, // Aisle
-    SeatData(id: '1C', label: '', status: SeatStatus.booked),
-    SeatData(id: '1D', label: '', status: SeatStatus.booked),
+  // 5-Column Grid Layout (Aisle is column 3 / index 2 of each row)
+  late List<SeatData?> _seatGrid;
 
-    SeatData(id: '2A', label: '2A', status: SeatStatus.selected), // Initially selected
-    SeatData(id: '2B', label: '2B', status: SeatStatus.available),
-    null,
-    SeatData(id: '2C', label: '2C', status: SeatStatus.ladies),
-    SeatData(id: '2D', label: '2D', status: SeatStatus.ladies),
+  @override
+  void initState() {
+    super.initState();
+    final bus = BookingManager.selectedBus;
+    if (bus != null) {
+      _pricePerSeat = bus['price'];
+      _isSleeperBus = bus['type'].toString().contains('Sleeper');
+    }
 
-    SeatData(id: '3A', label: '3A', status: SeatStatus.available),
-    SeatData(id: '3B', label: '3B', status: SeatStatus.available),
-    null,
-    SeatData(id: '3C', label: '3C', status: SeatStatus.available),
-    SeatData(id: '3D', label: '3D', status: SeatStatus.available),
+    _initializeSeatGrid();
+  }
 
-    SeatData(id: '4A', label: '', status: SeatStatus.booked),
-    SeatData(id: '4B', label: '', status: SeatStatus.booked),
-    null,
-    SeatData(id: '4C', label: '4C', status: SeatStatus.available),
-    SeatData(id: '4D', label: '4D', status: SeatStatus.available),
-  ];
+  void _initializeSeatGrid() {
+    _seatGrid = [
+      SeatData(id: '1A', label: '1A', status: SeatStatus.available),
+      SeatData(id: '1B', label: '1B', status: SeatStatus.available),
+      null, // Aisle
+      SeatData(id: '1C', label: '1C', status: SeatStatus.booked),
+      SeatData(id: '1D', label: '1D', status: SeatStatus.booked),
+
+      SeatData(id: '2A', label: '2A', status: SeatStatus.available),
+      SeatData(id: '2B', label: '2B', status: SeatStatus.available),
+      null,
+      SeatData(id: '2C', label: '2C', status: SeatStatus.ladies),
+      SeatData(id: '2D', label: '2D', status: SeatStatus.ladies),
+
+      SeatData(id: '3A', label: '3A', status: SeatStatus.available),
+      SeatData(id: '3B', label: '3B', status: SeatStatus.booked),
+      null,
+      SeatData(id: '3C', label: '3C', status: SeatStatus.available),
+      SeatData(id: '3D', label: '3D', status: SeatStatus.available),
+
+      SeatData(id: '4A', label: '4A', status: SeatStatus.available),
+      SeatData(id: '4B', label: '4B', status: SeatStatus.available),
+      null,
+      SeatData(id: '4C', label: '4C', status: SeatStatus.available),
+      SeatData(id: '4D', label: '4D', status: SeatStatus.available),
+
+      SeatData(id: '5A', label: '5A', status: SeatStatus.booked),
+      SeatData(id: '5B', label: '5B', status: SeatStatus.available),
+      null,
+      SeatData(id: '5C', label: '5C', status: SeatStatus.available),
+      SeatData(id: '5D', label: '5D', status: SeatStatus.available),
+
+      SeatData(id: '6A', label: '6A', status: SeatStatus.available),
+      SeatData(id: '6B', label: '6B', status: SeatStatus.available),
+      null,
+      SeatData(id: '6C', label: '6C', status: SeatStatus.available),
+      SeatData(id: '6D', label: '6D', status: SeatStatus.available),
+    ];
+  }
 
   List<SeatData> get _selectedSeats => _seatGrid.where((s) => s != null && s.status == SeatStatus.selected).cast<SeatData>().toList();
 
   void _toggleSeat(SeatData seat) {
     if (seat.status == SeatStatus.booked) return;
-    
+
+    final maxAllowed = BookingManager.travellersCount;
+
     setState(() {
       if (seat.status == SeatStatus.selected) {
+        // Revert to original type
         if (seat.id == '2C' || seat.id == '2D') {
           seat.status = SeatStatus.ladies;
         } else {
           seat.status = SeatStatus.available;
         }
       } else {
+        // Enforce maximum seat selections matching travellersCount
+        if (_selectedSeats.length >= maxAllowed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.primary,
+              content: Text(
+                'You searched for $maxAllowed travellers. Adjust travellers count on Home page to book more seats.',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white),
+              ),
+            ),
+          );
+          return;
+        }
         seat.status = SeatStatus.selected;
       }
+
+      // Sync with global booking manager
+      BookingManager.selectedSeats = _selectedSeats.map((s) => s.id).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final routeText = "${BookingManager.fromCity} → ${BookingManager.toCity}";
+    final busName = BookingManager.selectedBus != null ? BookingManager.selectedBus!['name'] : 'Premium Shuttle';
+
     return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFF121318), // background
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      drawer: _buildDrawer(context),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Seats',
+              style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+            Text(
+              routeText,
+              style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        shape: Border(bottom: BorderSide(color: AppColors.outline, width: 1)),
+      ),
       body: Stack(
         children: [
-          // Background Gradient
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    const Color(0xFF002366).withOpacity(0.9), // primary-container
-                    const Color(0xFF0D0E12).withOpacity(0.9), // surface-container-lowest
-                    const Color(0xFF121318).withOpacity(0.9), // background
-                  ],
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.only(
+              top: 16,
+              bottom: 180, // space for bottom confirm card
+              left: 24,
+              right: 24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Journey Summary Card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.outline),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            busName,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            BookingManager.selectedBus != null ? BookingManager.selectedBus!['type'] : 'Premium Class',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'FARE PER SEAT',
+                            style: GoogleFonts.manrope(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            '₹${_pricePerSeat.round()}',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+
+                // Legend row
+                _buildLegendRow(),
+                const SizedBox(height: 24),
+
+                // Seat Map Container (Styled like RedBus driver at front)
+                _buildSeatLayout(),
+              ],
             ),
           ),
-          
-          SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                top: 16,
-                bottom: 160, // Space for floating bar
-                left: 24,
-                right: 24,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildJourneySummary(),
-                  const SizedBox(height: 12),
-                  _buildSeatMapLegend(),
-                  const SizedBox(height: 16),
-                  _buildInteractiveSeatMap(),
-                  const SizedBox(height: 24),
-                  _buildAmenitiesPreview(),
-                ],
-              ),
-            ),
-          ),
-          
-          _buildTopAppBar(context),
-          
-          // Only show floating bar if there are selected seats
-          if (_selectedSeats.isNotEmpty)
-            _buildFloatingSelectionBar(context),
+
+          // Confirm Floating Action Bar
+          if (_selectedSeats.isNotEmpty) _buildConfirmBar(),
         ],
       ),
     );
   }
 
-  Widget _buildTopAppBar(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            height: MediaQuery.of(context).padding.top + 64,
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: 24, right: 24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF121318).withOpacity(0.8), // surface / 80
-              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
-              boxShadow: [
-                BoxShadow(color: const Color(0xFF0D2C6E).withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 1)),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back, color: Color(0xFFB3C5FF)),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'SBSTC Premium Bus',
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFB3C5FF),
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.notifications, color: Color(0xFFC5C6D2)),
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: () => _scaffoldKey.currentState?.openDrawer(),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFB3C5FF).withOpacity(0.2)),
-                        ),
-                        child: ClipOval(
-                          child: Image.network(
-                            'https://lh3.googleusercontent.com/aida-public/AB6AXuCFzE72WiBAGPAT8iyjSR5hZ2Kp7rkmFfwjDu1EiUQaW8bn4HbvqPpFiv9Us1ThOn-SRHnF9Nx9zVwLmxaCTUSzSjJftREu8j3RvPpBKoPYkpIBl3yiELn69OGZCXSgKZeOJddInET_32ilfrWlsgZTEFOAhcotueD8c4LAFkLRnqMvVmO_t8LF8xdZCWm-NMan_JLheRyLZIbewvHu5YGQJJ1KcS5YairQMufr3uxH-goGTeoluVbhnSn9sUD74_IYND_c6IXtsgJE',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildJourneySummary() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.only(top: 80),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border(
-          top: BorderSide(color: Colors.white.withOpacity(0.15)),
-          left: BorderSide(color: Colors.white.withOpacity(0.15)),
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'KOLKATA → ASANSOL',
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFC5C6D2),
-                      letterSpacing: 0.96,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Premium Volvo Multi-Axle',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFFF9EF), // secondary
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '08:30 AM',
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF00DDDD), // tertiary
-                      letterSpacing: 0.96,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Gate 4, Esplanade',
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFFC5C6D2), // on-surface-variant
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSeatMapLegend() {
+  Widget _buildLegendRow() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          _buildLegendItem(
-            color: const Color(0xFF343439), // surface-container-highest
-            borderColor: Colors.white.withOpacity(0.1),
-            label: 'AVAILABLE',
-          ),
-          const SizedBox(width: 16),
-          _buildLegendItem(
-            color: const Color(0xFF00DDDD),
-            borderColor: Colors.transparent,
-            label: 'SELECTED',
-            glowColor: const Color(0xFF00DDDD).withOpacity(0.4),
-          ),
-          const SizedBox(width: 16),
-          _buildLegendItem(
-            color: const Color(0xFFC5C6D2).withOpacity(0.2),
-            borderColor: Colors.transparent,
-            label: 'BOOKED',
-            icon: Icons.close,
-          ),
-          const SizedBox(width: 16),
-          _buildLegendItem(
-            color: const Color(0xFFFFB4AB).withOpacity(0.3),
-            borderColor: const Color(0xFFFFB4AB).withOpacity(0.5),
-            label: 'LADIES',
-            glowColor: const Color(0xFFFFB4AB).withOpacity(0.3),
-            labelColor: const Color(0xFFFFB4AB),
-          ),
+          _buildLegendItem(color: AppColors.outline, border: AppColors.outline, label: 'Available'),
+          const SizedBox(width: 12),
+          _buildLegendItem(color: AppColors.primary, border: Colors.transparent, label: 'Selected'),
+          const SizedBox(width: 12),
+          _buildLegendItem(color: const Color(0x33A0A5B5), border: Colors.transparent, label: 'Booked', hasCross: true),
+          const SizedBox(width: 12),
+          _buildLegendItem(color: const Color(0x33FF9F43), border: const Color(0xFFFF9F43), label: 'Ladies'),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem({
-    required Color color,
-    required Color borderColor,
-    required String label,
-    Color? glowColor,
-    IconData? icon,
-    Color? labelColor,
-  }) {
+  Widget _buildLegendItem({required Color color, required Color border, required String label, bool hasCross = false}) {
     return Row(
       children: [
         Container(
-          width: 20,
-          height: 20,
+          width: 18,
+          height: 18,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: borderColor),
-            boxShadow: glowColor != null
-                ? [BoxShadow(color: glowColor, blurRadius: 15)]
-                : null,
+            border: Border.all(color: border),
+            borderRadius: BorderRadius.circular(4),
           ),
-          child: icon != null
-              ? Icon(icon, size: 14, color: const Color(0xFFC5C6D2))
-              : null,
+          child: hasCross ? const Icon(Icons.close, size: 12, color: AppColors.textSecondary) : null,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Text(
           label,
           style: GoogleFonts.manrope(
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: labelColor ?? const Color(0xFFC5C6D2),
-            letterSpacing: 0.8,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInteractiveSeatMap() {
+  Widget _buildSeatLayout() {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const RadialGradient(
-          center: Alignment.center,
-          radius: 1.5,
-          colors: [
-            Color(0xFF1E1F24), // surface-container
-            Color(0xFF0D0E12), // surface-container-lowest
-          ],
-        ),
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.outline),
       ),
       child: Column(
         children: [
-          // Front of Bus
+          // Front of Bus & Driver Seat Visual (Signature RedBus style)
           Container(
-            padding: const EdgeInsets.only(bottom: 24),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
+            padding: const EdgeInsets.only(bottom: 16),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppColors.outline)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.15)),
-                  ),
-                  child: const Icon(Icons.airline_seat_recline_extra, color: Color(0xFFC5C6D2)),
-                ),
+                // Front / Steer Visual
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 80,
+                      width: 50,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFB3C5FF).withOpacity(0.2),
+                        color: AppColors.outline,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
-                      'FRONT OF BUS',
+                      'FRONT',
                       style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFC5C6D2).withOpacity(0.4),
-                        letterSpacing: 0.96,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0.8,
                       ),
                     ),
                   ],
                 ),
+                // Driver Seat Icon
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF343439),
-                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.outline.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.outline),
                   ),
-                  child: const Icon(Icons.navigation, color: Color(0xFFC5C6D2)),
+                  child: const Icon(Icons.radio_button_checked, color: AppColors.textSecondary, size: 18),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          
-          // Grid
+
+          // Seats Grid
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _seatGrid.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
-              childAspectRatio: 1.0,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 24,
+              childAspectRatio: _isSleeperBus ? 0.55 : 0.9, // rectangular sleeper berths vs square seaters
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
             ),
             itemBuilder: (context, index) {
               final seat = _seatGrid[index];
               if (seat == null) return const SizedBox(); // Aisle
-              return _buildSeat(seat);
+              return _buildSeatWidget(seat);
             },
-          ),
-          
-          const SizedBox(height: 48),
-          
-          // Rear Indicator
-          Container(
-            width: 64,
-            height: 6,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(3),
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSeat(SeatData seat) {
-    bool isAvailable = seat.status == SeatStatus.available;
+  Widget _buildSeatWidget(SeatData seat) {
     bool isSelected = seat.status == SeatStatus.selected;
     bool isBooked = seat.status == SeatStatus.booked;
     bool isLadies = seat.status == SeatStatus.ladies;
 
-    Color bgColor;
-    Color borderColor;
-    Color textColor;
-    List<BoxShadow>? shadows;
+    Color bgColor = AppColors.background;
+    Color borderColor = AppColors.outline;
+    Color textColor = AppColors.textSecondary;
     Widget? icon;
 
     if (isSelected) {
-      bgColor = const Color(0xFF00DDDD);
+      bgColor = AppColors.primary;
       borderColor = Colors.transparent;
-      textColor = const Color(0xFF0D2C6E);
-      shadows = [BoxShadow(color: const Color(0xFF00DDDD).withOpacity(0.4), blurRadius: 15)];
+      textColor = Colors.white;
     } else if (isBooked) {
-      bgColor = const Color(0xFFC5C6D2).withOpacity(0.1);
+      bgColor = const Color(0x11A0A5B5);
       borderColor = Colors.transparent;
       textColor = Colors.transparent;
-      icon = const Icon(Icons.close, color: Color(0xFFC5C6D2), size: 14);
+      icon = const Icon(Icons.close, color: AppColors.textSecondary, size: 12);
     } else if (isLadies) {
-      bgColor = const Color(0xFFFFB4AB).withOpacity(0.2);
-      borderColor = const Color(0xFFFFB4AB).withOpacity(0.4);
-      textColor = const Color(0xFFFFB4AB);
-      shadows = [BoxShadow(color: const Color(0xFFFFB4AB).withOpacity(0.3), blurRadius: 15)];
-    } else {
-      // Available
-      bgColor = Colors.white.withOpacity(0.08);
-      borderColor = Colors.white.withOpacity(0.1);
-      textColor = const Color(0xFFC5C6D2);
+      bgColor = const Color(0x22FF9F43);
+      borderColor = const Color(0xFFFF9F43);
+      textColor = const Color(0xFFFF9F43);
     }
 
     return GestureDetector(
@@ -495,417 +388,131 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor),
-          boxShadow: shadows,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: borderColor, width: 1.5),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: isAvailable || isLadies
-              ? BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: Center(
-                    child: Text(
-                      seat.label,
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: textColor,
-                        letterSpacing: 0.96,
-                      ),
-                    ),
-                  ),
-                )
-              : Center(
-                  child: icon ?? Text(
-                    seat.label,
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                      letterSpacing: 0.96,
-                    ),
-                  ),
+        child: Center(
+          child: icon ??
+              Text(
+                seat.label,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
                 ),
+              ),
         ),
       ),
     );
   }
 
-  Widget _buildAmenitiesPreview() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border(
-                top: BorderSide(color: Colors.white.withOpacity(0.15)),
-                left: BorderSide(color: Colors.white.withOpacity(0.15)),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF002366),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.wifi, color: Color(0xFFB3C5FF)),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'STARLINK',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFFC5C6D2),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        Text(
-                          'Free Wi-Fi',
-                          style: GoogleFonts.manrope(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFFFFF9EF),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border(
-                top: BorderSide(color: Colors.white.withOpacity(0.15)),
-                left: BorderSide(color: Colors.white.withOpacity(0.15)),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF002E2E),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.bolt, color: Color(0xFF00DDDD)),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'CHARGING',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFFC5C6D2),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        Text(
-                          'USB-C Port',
-                          style: GoogleFonts.manrope(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFFFFF9EF),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFloatingSelectionBar(BuildContext context) {
+  Widget _buildConfirmBar() {
     double totalFare = _selectedSeats.length * _pricePerSeat;
 
     return Positioned(
-      bottom: 24,
-      left: 24,
-      right: 24,
+      bottom: 20,
+      left: 20,
+      right: 20,
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.outline),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.5),
-              blurRadius: 50,
-              offset: const Offset(0, 20),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'SELECTED SEATS',
-                            style: GoogleFonts.manrope(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFC5C6D2),
-                              letterSpacing: 0.96,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _selectedSeats.map((s) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF00DDDD).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(100),
-                                  border: Border.all(color: const Color(0xFF00DDDD).withOpacity(0.4)),
-                                ),
-                                child: Text(
-                                  s.label,
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF00DDDD),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
+                    Text(
+                      'SEATS SELECTED',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0.8,
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'TOTAL FARE',
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFFC5C6D2),
-                            letterSpacing: 0.96,
-                          ),
-                        ),
-                        Text(
-                          '₹${totalFare.toStringAsFixed(2)}',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFB3C5FF),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 4),
+                    Text(
+                      _selectedSeats.map((s) => s.id).join(', '),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const PassengerInformationScreen()),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00DDDD), Color(0xFF435B9F)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.3),
-                            blurRadius: 1,
-                            offset: const Offset(0, 1), // inner shadow simulation
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Confirm Selection',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Icon(Icons.trending_flat, color: Colors.white),
-                        ],
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'TOTAL FARE',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0.8,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '₹${totalFare.round()}',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      backgroundColor: const Color(0xFF121318).withOpacity(0.95), // surface-dim / 95
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(right: BorderSide(color: Colors.white.withOpacity(0.05))),
-        ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF002366),
-                          border: Border.all(color: const Color(0xFFB3C5FF), width: 2),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: ClipOval(
-                            child: Image.network(
-                              'https://lh3.googleusercontent.com/aida-public/AB6AXuCFzE72WiBAGPAT8iyjSR5hZ2Kp7rkmFfwjDu1EiUQaW8bn4HbvqPpFiv9Us1ThOn-SRHnF9Nx9zVwLmxaCTUSzSjJftREu8j3RvPpBKoPYkpIBl3yiELn69OGZCXSgKZeOJddInET_32ilfrWlsgZTEFOAhcotueD8c4LAFkLRnqMvVmO_t8LF8xdZCWm-NMan_JLheRyLZIbewvHu5YGQJJ1KcS5YairQMufr3uxH-goGTeoluVbhnSn9sUD74_IYND_c6IXtsgJE',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PassengerInformationScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Confirm Seats',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Alex Morgan',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFFB3C5FF),
-                            ),
-                          ),
-                          Text(
-                            'Gold Member • 2,450 pts',
-                            style: GoogleFonts.manrope(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFC5C6D2),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  _buildDrawerItem(icon: Icons.king_bed, title: 'Premium Lounge', isHighlighted: true),
-                  _buildDrawerItem(icon: Icons.verified_user, title: 'Travel Insurance'),
-                  _buildDrawerItem(icon: Icons.military_tech, title: 'Loyalty Rewards'),
-                  _buildDrawerItem(icon: Icons.support_agent, title: 'Support'),
-                  _buildDrawerItem(icon: Icons.settings, title: 'Settings'),
-                ],
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_forward, size: 16),
+                  ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawerItem({required IconData icon, required String title, bool isHighlighted = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isHighlighted ? Colors.white.withOpacity(0.05) : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  color: isHighlighted ? const Color(0xFFFFDB3C) : const Color(0xFFC5C6D2),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.w500,
-                    color: isHighlighted ? const Color(0xFFFFDB3C) : const Color(0xFFC5C6D2),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
