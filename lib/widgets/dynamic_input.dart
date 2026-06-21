@@ -50,23 +50,23 @@ class _DynamicBookingInputState extends State<DynamicBookingInput> {
             child: Text(
               widget.label.toUpperCase(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.secondary,
+                    color: AppColors.primary,
                   ),
             ),
           ),
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: AppColors.background.withOpacity(0.5),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _isFocused ? AppColors.tertiary : Colors.transparent,
-              width: 1,
+              color: _isFocused ? AppColors.primary : AppColors.outline,
+              width: 1.2,
             ),
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: AppColors.tertiary.withOpacity(0.2),
+                      color: AppColors.primary.withOpacity(0.08),
                       blurRadius: 8,
                       spreadRadius: 1,
                     )
@@ -85,7 +85,7 @@ class _DynamicBookingInputState extends State<DynamicBookingInput> {
               prefixIcon: widget.prefixIcon != null
                   ? Icon(
                       widget.prefixIcon,
-                      color: _isFocused ? AppColors.tertiary : AppColors.textSecondary,
+                      color: _isFocused ? AppColors.primary : AppColors.textSecondary,
                     )
                   : null,
               border: InputBorder.none,

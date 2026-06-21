@@ -10,7 +10,7 @@ class LiveTrackingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFF0A0A0C),
+      backgroundColor: AppColors.background,
       body: LiveTrackingView(showBackButton: true),
     );
   }
@@ -94,7 +94,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
         // Simulated map background
         Positioned.fill(
           child: Container(
-            color: const Color(0xFF0A0A0C),
+            color: AppColors.background,
             child: AnimatedBuilder(
               animation: _pulseController,
               builder: (context, child) {
@@ -142,7 +142,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                     if (widget.showBackButton) ...[
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back, color: Colors.white),
+                        child: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                       ),
                       const SizedBox(width: 16),
                     ],
@@ -151,7 +151,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -200,7 +200,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                                 style: GoogleFonts.spaceGrotesk(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ],
@@ -253,7 +253,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                               borderRadius: BorderRadius.circular(2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryLight.withOpacity(0.5),
+                                  color: AppColors.primaryLight.withOpacity(0.2),
                                   blurRadius: 8,
                                 ),
                               ],
@@ -305,10 +305,10 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: isCurrent ? AppColors.primary.withOpacity(0.2) : AppColors.surface,
+                            color: isCurrent ? AppColors.primary.withOpacity(0.08) : AppColors.surface,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: isCurrent ? AppColors.primaryLight : AppColors.outline,
+                              color: isCurrent ? AppColors.primary : AppColors.outline,
                             ),
                           ),
                           child: Row(
@@ -322,7 +322,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                                     style: GoogleFonts.manrope(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: isCurrent ? Colors.white : AppColors.textSecondary,
+                                      color: isCurrent ? AppColors.primary : AppColors.textSecondary,
                                     ),
                                   ),
                                   Text(
@@ -339,7 +339,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                               Icon(
                                 isDone ? Icons.check_circle : (isCurrent ? Icons.near_me : Icons.radio_button_unchecked),
                                 size: 16,
-                                color: isCurrent ? AppColors.primaryLight : (isDone ? AppColors.tertiary : AppColors.textSecondary.withOpacity(0.4)),
+                                color: isCurrent ? AppColors.primary : (isDone ? AppColors.tertiary : AppColors.textSecondary.withOpacity(0.4)),
                               ),
                             ],
                           ),
@@ -386,7 +386,7 @@ class _LiveTrackingViewState extends State<LiveTrackingView> with TickerProvider
                                 style: GoogleFonts.spaceGrotesk(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               Text(
@@ -455,7 +455,7 @@ class MapRoutePainter extends CustomPainter {
 
     // Draw landmark dots
     final landmarkPaint = Paint()
-      ..color = AppColors.outline
+      ..color = AppColors.textSecondary.withOpacity(0.3)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.4, size.height * 0.15), 6, landmarkPaint);
     canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.55), 6, landmarkPaint);

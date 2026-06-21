@@ -54,7 +54,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
               if (widget.showBackButton) ...[
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back, color: AppColors.primaryLight),
+                  child: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                 ),
                 const SizedBox(width: 16),
               ],
@@ -143,7 +143,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                   itemBuilder: (context, index) {
                     if (index == filteredBookings.length) {
                       return Padding(
-                        padding: const EdgeInsets.only(top: 16, bottom: 40),
+                        padding: const EdgeInsets.only(top: 16, bottom: 120),
                         child: _buildStatsGrid(),
                       );
                     }
@@ -199,7 +199,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
         border: Border.all(color: AppColors.outline),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -232,7 +232,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -243,7 +243,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                     color: isLive ? AppColors.primary.withOpacity(0.1) : AppColors.outline,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isLive ? AppColors.primary.withOpacity(0.3) : Colors.transparent,
+                      color: isLive ? AppColors.primary.withOpacity(0.2) : Colors.transparent,
                     ),
                   ),
                   child: Text(
@@ -251,7 +251,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                     style: GoogleFonts.manrope(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: isLive ? AppColors.primaryLight : AppColors.textSecondary,
+                      color: isLive ? AppColors.primary : AppColors.textSecondary,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -274,7 +274,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
@@ -296,17 +296,17 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                           style: GoogleFonts.manrope(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primaryLight,
+                            color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryLight)),
+                            Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary)),
                             Expanded(child: Container(height: 1, color: AppColors.outline)),
-                            const Icon(Icons.directions_bus, size: 16, color: AppColors.primaryLight),
+                            const Icon(Icons.directions_bus, size: 16, color: AppColors.primary),
                             Expanded(child: Container(height: 1, color: AppColors.outline)),
-                            Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryLight)),
+                            Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary)),
                           ],
                         ),
                       ],
@@ -321,7 +321,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
@@ -343,8 +343,9 @@ class _TripHistoryViewState extends State<TripHistoryView> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.outline),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -366,7 +367,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                         style: GoogleFonts.manrope(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -421,14 +422,14 @@ class _TripHistoryViewState extends State<TripHistoryView> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.location_on, size: 16, color: AppColors.primaryLight),
+                              const Icon(Icons.location_on, size: 16, color: AppColors.primary),
                               const SizedBox(width: 6),
                               Text(
                                 'Track Bus Live',
                                 style: GoogleFonts.manrope(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryLight,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
@@ -464,8 +465,8 @@ class _TripHistoryViewState extends State<TripHistoryView> {
           children: [
             Expanded(
               child: _buildStatCard(
-                icon: Icons.star,
-                iconColor: AppColors.primaryLight,
+                icon: Icons.stars,
+                iconColor: AppColors.primary,
                 label: 'LOYALTY POINTS',
                 value: '2,450',
               ),
@@ -517,7 +518,7 @@ class _TripHistoryViewState extends State<TripHistoryView> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
         ],

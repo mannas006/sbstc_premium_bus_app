@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
+import '../theme/colors.dart';
 import 'home_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,7 +18,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   late Animation<double> _floatScaleAnimation;
 
   late AnimationController _shimmerController;
-  
   late AnimationController _pulseController;
 
   @override
@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
 
-    // Redirect
+    // Redirect to Home Dashboard after 4 seconds
     Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -74,27 +74,26 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121318), // surface
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Background Gradient
+          // Background Gradient (Midnight Navy Base)
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF002366).withOpacity(0.9), // primary-container
-                    const Color(0xFF0D0E12).withOpacity(0.9), // surface-container-lowest
-                    const Color(0xFF121318).withOpacity(0.9), // background
+                    AppColors.background,
+                    AppColors.surface,
                   ],
                 ),
               ),
             ),
           ),
           
-          // Ambient Glow Top Left
+          // Ambient Glow Top Left (Royal Blue Glow)
           Positioned(
             top: -100,
             left: -100,
@@ -103,15 +102,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFB3C5FF).withOpacity(0.1), // primary-fixed-dim
+                color: AppColors.primary.withOpacity(0.08),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFFB3C5FF).withOpacity(0.1), blurRadius: 120, spreadRadius: 120),
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.08),
+                    blurRadius: 120,
+                    spreadRadius: 120,
+                  ),
                 ],
               ),
             ),
           ),
           
-          // Ambient Glow Bottom Right
+          // Ambient Glow Bottom Right (Sky Blue Glow)
           Positioned(
             bottom: -100,
             right: -100,
@@ -120,19 +123,23 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF002E2E).withOpacity(0.2), // tertiary-container
+                color: AppColors.primaryLight.withOpacity(0.08),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFF002E2E).withOpacity(0.2), blurRadius: 120, spreadRadius: 120),
+                  BoxShadow(
+                    color: AppColors.primaryLight.withOpacity(0.08),
+                    blurRadius: 120,
+                    spreadRadius: 120,
+                  ),
                 ],
               ),
             ),
           ),
 
-          // Bus Float Image
+          // Bus Float Image (Transparent overlay adjusted for light mode)
           Positioned.fill(
             child: Center(
               child: Opacity(
-                opacity: 0.3,
+                opacity: 0.06,
                 child: Transform.rotate(
                   angle: -0.035, // -2 deg
                   child: AnimatedBuilder(
@@ -146,7 +153,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             'https://lh3.googleusercontent.com/aida-public/AB6AXuB5e_XctxudXfT8H54lIAmGtvtG1Jqxf44bO2efw78Enls3l40YR9UkiASC2Xe025qUJDk3Ur93dwY-WFdfRA-294-UoJVHnvKhwEVxYXoeYwMRElT3uM9Q51YvIfLijGNuENTLl4fwQHhukrFRKu6gXSehvhqa4ngV6yRrkbmpOubZsmEcyWjcJgaUXr_oDY-fo0is3jth8PTPbGJkepg8OiOrgd82Gh0bCUWgq5FRIMkXHMmBvmAuRyVZVq8V5erhOXZINhHmLuc_',
                             fit: BoxFit.contain,
                             width: MediaQuery.of(context).size.width * 0.9,
-                            colorBlendMode: BlendMode.screen,
                           ),
                         ),
                       );
@@ -157,13 +163,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             ),
           ),
 
-          // Main Content
+          // Main Branding Content
           SafeArea(
             child: Column(
               children: [
                 const Spacer(),
                 
-                // Logo Section
+                // Logo Section with Glassmorphism Ring
                 Center(
                   child: SizedBox(
                     width: 150,
@@ -171,11 +177,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Glass Ring
+                        // Glass Outer Ring
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                            border: Border.all(color: AppColors.outline, width: 1.2),
                           ),
                           child: ClipOval(
                             child: BackdropFilter(
@@ -190,11 +196,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           height: 130,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.05),
-                            border: Border.all(color: Colors.white.withOpacity(0.15)),
+                            color: AppColors.surface,
+                            border: Border.all(color: AppColors.outline),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF00DDDD).withOpacity(0.15),
+                                color: AppColors.primaryLight.withOpacity(0.08),
                                 blurRadius: 40,
                               ),
                             ],
@@ -203,8 +209,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             child: Center(
                               child: Image.network(
                                 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFzE72WiBAGPAT8iyjSR5hZ2Kp7rkmFfwjDu1EiUQaW8bn4HbvqPpFiv9Us1ThOn-SRHnF9Nx9zVwLmxaCTUSzSjJftREu8j3RvPpBKoPYkpIBl3yiELn69OGZCXSgKZeOJddInET_32ilfrWlsgZTEFOAhcotueD8c4LAFkLRnqMvVmO_t8LF8xdZCWm-NMan_JLheRyLZIbewvHu5YGQJJ1KcS5YairQMufr3uxH-goGTeoluVbhnSn9sUD74_IYND_c6IXtsgJE',
-                                width: 110,
-                                height: 110,
+                                width: 100,
+                                height: 100,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -216,40 +222,40 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 ),
                 const SizedBox(height: 24),
                 
-                // Title
+                // SBSTC Brand Title
                 Text(
                   'SBSTC',
                   style: GoogleFonts.spaceGrotesk(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFB3C5FF),
+                    fontSize: 42,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
                     letterSpacing: -0.8,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   'Premium Bus Service',
                   style: GoogleFonts.manrope(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF00DDDD),
-                    letterSpacing: 3.6,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryLight,
+                    letterSpacing: 4.5,
                   ),
                 ),
                 
                 const Spacer(),
                 
-                // Loading Component
+                // Progress Loader
                 SizedBox(
                   width: 280,
                   child: Column(
                     children: [
-                      // Shimmer Bar
+                      // Sliding Shimmer Bar
                       Container(
                         height: 4,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: AppColors.outline,
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: ClipRRect(
@@ -258,9 +264,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             animation: _shimmerController,
                             builder: (context, child) {
                               return FractionallySizedBox(
-                                widthFactor: 0.6,
+                                widthFactor: 0.4,
                                 alignment: Alignment(
-                                  // Map 0..1 to -2..2 for infinite sliding effect
                                   (_shimmerController.value * 4) - 2, 
                                   0,
                                 ),
@@ -269,14 +274,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                     gradient: const LinearGradient(
                                       colors: [
                                         Colors.transparent,
-                                        Color(0xFF00DDDD),
+                                        AppColors.primaryLight,
                                         Colors.transparent,
                                       ],
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF00DDDD).withOpacity(0.5),
-                                        blurRadius: 15,
+                                        color: AppColors.primaryLight.withOpacity(0.4),
+                                        blurRadius: 10,
                                       )
                                     ],
                                   ),
@@ -286,43 +291,43 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       
-                      // Status Indicator
+                      // Animated Status Text
                       AnimatedBuilder(
                         animation: _pulseController,
                         builder: (context, child) {
                           return Opacity(
-                            opacity: 0.3 + (_pulseController.value * 0.7),
+                            opacity: 0.4 + (_pulseController.value * 0.6),
                             child: Text(
-                              'Initializing Flight Systems',
+                              'Initializing Travel Systems',
                               style: GoogleFonts.manrope(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xB3C5C6D2), // on-surface-variant / 70%
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           );
                         },
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(
                             Icons.verified_user,
-                            size: 14,
-                            color: Color(0xFF00DDDD), // tertiary-fixed-dim
+                            size: 13,
+                            color: AppColors.tertiary,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Text(
-                            'ENCRYPTED CONNECTION',
+                            'SECURE CONNECTION',
                             style: GoogleFonts.manrope(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF00DDDD),
-                              letterSpacing: 1.5,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.tertiary,
+                              letterSpacing: 1.2,
                             ),
                           ),
                         ],
@@ -331,77 +336,71 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   ),
                 ),
                 
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
                 
-                // Footer
+                // Bottom Feature Promo Card (using AppColors.surface)
                 Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.15)),
+                    border: Border.all(color: AppColors.outline),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF002E2E).withOpacity(0.4),
-                            ),
-                            child: const Icon(
-                              Icons.stars,
-                              color: Color(0xFF00DDDD),
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'First Class Experience',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFB3C5FF),
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'The future of intercity travel is here.',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xFFC5C6D2),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primary.withOpacity(0.15),
+                        ),
+                        child: const Icon(
+                          Icons.stars,
+                          color: AppColors.primaryLight,
+                          size: 20,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Premium Travel Standard',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              'Comfortable reclining chairs & complimentary water.',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 
                 Text(
-                  '© 2024 SBSTC Premium Division',
+                  '© 2026 SBSTC Premium Division',
                   style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0x66C5C6D2),
-                    letterSpacing: 1.5,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary.withOpacity(0.4),
+                    letterSpacing: 1.0,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
             ),
           ),

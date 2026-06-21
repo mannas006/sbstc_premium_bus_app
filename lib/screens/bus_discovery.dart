@@ -195,7 +195,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       TextButton(
@@ -209,7 +209,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                         child: Text(
                           'RESET',
                           style: GoogleFonts.manrope(
-                            color: AppColors.primaryLight,
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -224,7 +224,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       'Air Conditioned (A/C)',
-                      style: GoogleFonts.manrope(color: Colors.white, fontSize: 16),
+                      style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 16),
                     ),
                     value: tempAC,
                     onChanged: (v) => setSheetState(() => tempAC = v),
@@ -236,7 +236,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       'Sleeper Coaches',
-                      style: GoogleFonts.manrope(color: Colors.white, fontSize: 16),
+                      style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 16),
                     ),
                     value: tempSleeper,
                     onChanged: (v) => setSheetState(() => tempSleeper = v),
@@ -247,7 +247,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                   // Price range
                   Text(
                     'Max Price: ₹${tempPriceLimit.round()}',
-                    style: GoogleFonts.manrope(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Slider(
                     activeColor: AppColors.primary,
@@ -307,7 +307,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -318,7 +318,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.textPrimary,
               ),
             ),
             Text(
@@ -332,7 +332,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.tune, color: Colors.white),
+            icon: const Icon(Icons.tune, color: AppColors.textPrimary),
             onPressed: () => _showFilterBottomSheet(context),
           )
         ],
@@ -398,7 +398,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
             style: GoogleFonts.manrope(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -492,7 +492,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                                     style: GoogleFonts.spaceGrotesk(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   Text(
@@ -507,7 +507,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.secondary.withOpacity(0.15),
+                                  color: AppColors.secondary.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Row(
@@ -518,8 +518,8 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                                       bus['rating'].toString(),
                                       style: GoogleFonts.spaceGrotesk(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.secondary,
                                       ),
                                     ),
                                   ],
@@ -541,7 +541,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                                     style: GoogleFonts.spaceGrotesk(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   Text(
@@ -563,7 +563,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                                         style: GoogleFonts.manrope(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
-                                          color: AppColors.primaryLight,
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
@@ -571,7 +571,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                                         children: [
                                           Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.outline)),
                                           Expanded(child: Container(height: 1, color: AppColors.outline)),
-                                          const Icon(Icons.directions_bus, size: 16, color: AppColors.primaryLight),
+                                          const Icon(Icons.directions_bus, size: 16, color: AppColors.primary),
                                           Expanded(child: Container(height: 1, color: AppColors.outline)),
                                           Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.outline)),
                                         ],
@@ -588,7 +588,7 @@ class _BusDiscoveryScreenState extends State<BusDiscoveryScreen> {
                                     style: GoogleFonts.spaceGrotesk(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   Text(

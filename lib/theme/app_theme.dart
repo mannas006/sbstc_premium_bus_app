@@ -3,11 +3,11 @@ import 'colors.dart';
 import 'typography.dart';
 
 class AppTheme {
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme.dark(
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         tertiary: AppColors.tertiary,
@@ -37,4 +37,7 @@ class AppTheme {
       ),
     );
   }
+
+  // Deprecated darkTheme redirecting to lightTheme to avoid compile-time issues
+  static ThemeData get darkTheme => lightTheme;
 }

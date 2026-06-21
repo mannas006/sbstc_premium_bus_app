@@ -42,22 +42,23 @@ class BookingManager {
   // Selected seats for checkout
   static List<String> selectedSeats = [];
 
-  // Primary passenger details
-  static String passengerName = '';
-  static String passengerAge = '';
+  // Primary passenger details (synchronized with user profile)
+  static String passengerName = 'Alex Morgan';
+  static String passengerAge = '28';
   static String passengerGender = 'Male';
-  static String passengerPhone = '';
-  static String passengerEmail = '';
+  static String passengerPhone = '9876543210';
+  static String passengerEmail = 'alex.morgan@gmail.com';
 
-  // Reset checkout details
+  static int loyaltyPoints = 2450;
+  static double walletBalance = 450.0;
+  static String appliedPromoCode = '';
+  static List<String> savedCards = ['4242 4242 4242 4242'];
+
+  // Reset checkout details (transaction specific)
   static void resetCheckout() {
     selectedBus = null;
     selectedSeats = [];
-    passengerName = '';
-    passengerAge = '';
-    passengerGender = 'Male';
-    passengerPhone = '';
-    passengerEmail = '';
+    appliedPromoCode = '';
   }
 
   // Add a new confirmed booking

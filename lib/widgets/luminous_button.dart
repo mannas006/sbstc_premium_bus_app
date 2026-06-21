@@ -37,9 +37,9 @@ class LuminousButton extends StatelessWidget {
         boxShadow: isPrimary
             ? [
                 BoxShadow(
-                  color: AppColors.primaryLight.withOpacity(0.5),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 12,
-                  spreadRadius: -2,
+                  spreadRadius: -1,
                   offset: const Offset(0, 4),
                 )
               ]

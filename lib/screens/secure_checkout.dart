@@ -14,9 +14,18 @@ class SecureCheckoutScreen extends StatefulWidget {
 class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
   String _selectedMethod = 'UPI';
 
+  // Card Controllers
   final TextEditingController _cardController = TextEditingController(text: '4242 4242 4242 4242');
   final TextEditingController _expiryController = TextEditingController(text: '12/28');
   final TextEditingController _cvvController = TextEditingController(text: '123');
+  final TextEditingController _savedCvvController = TextEditingController(text: '123');
+
+  // Checkout States
+  bool _payWithNewCard = false;
+  bool _saveCardForFuture = true;
+  String _selectedUPIApp = 'GPay';
+  final TextEditingController _upiIdController = TextEditingController(text: 'alex.morgan@okaxis');
+  String _selectedBank = 'HDFC';
 
   double _pricePerSeat = 720.0;
   String _busName = 'SBSTC Premium Coach';
@@ -28,6 +37,10 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
       _pricePerSeat = BookingManager.selectedBus!['price'];
       _busName = BookingManager.selectedBus!['name'];
     }
+    // If user has no saved cards, default to pay with new card
+    if (BookingManager.savedCards.isEmpty) {
+      _payWithNewCard = true;
+    }
   }
 
   @override
@@ -35,11 +48,140 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
     _cardController.dispose();
     _expiryController.dispose();
     _cvvController.dispose();
+    _savedCvvController.dispose();
+    _upiIdController.dispose();
     super.dispose();
   }
 
+  void _showPromoCodesSelectorSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Available Offers',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.textPrimary),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildPromoOptionRow('WEEKEND30', 'Weekend Cashback', 'Save 30% on your base fare'),
+              const SizedBox(height: 12),
+              _buildPromoOptionRow('FIRSTCLASS', 'First Booking Discount', 'Flat ₹150 discount for first time users'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPromoOptionRow(String code, String title, String desc) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  desc,
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    code,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                BookingManager.appliedPromoCode = code;
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: AppColors.tertiary,
+                  content: Text('Promo code "$code" applied!'),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minimumSize: Size.zero,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(
+              'APPLY',
+              style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _processPayment(double totalPayable) {
-    // Show a realistic payment processing loader
+    // If they paid with a new card and opted to save it
+    if (_selectedMethod == 'CARD' && _payWithNewCard && _saveCardForFuture) {
+      final newCard = _cardController.text.trim();
+      if (newCard.isNotEmpty && !BookingManager.savedCards.contains(newCard)) {
+        BookingManager.savedCards.add(newCard);
+      }
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -55,7 +197,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
               const SizedBox(height: 24),
               Text(
                 'Securing Transaction...',
-                style: GoogleFonts.spaceGrotesk(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                style: GoogleFonts.spaceGrotesk(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               Text(
@@ -70,11 +212,10 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
       },
     );
 
-    // Wait 2 seconds, add booking dynamically, and navigate to confirmation
+    // Wait 2 seconds, add booking, and navigate to confirmation
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pop(context); // Pop loading dialog
+      Navigator.pop(context); // Pop loader
 
-      // Add to BookingManager list
       final String formattedDate = "${BookingManager.departureDate.day} ${_getMonthName(BookingManager.departureDate.month)} ${BookingManager.departureDate.year}";
       final String depTime = BookingManager.selectedBus != null ? BookingManager.selectedBus!['departureTime'] : '08:30';
       final String arrTime = BookingManager.selectedBus != null ? BookingManager.selectedBus!['arrivalTime'] : '11:45';
@@ -92,7 +233,6 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
         totalFare: totalPayable,
       );
 
-      // Navigate to BookingConfirmedScreen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const BookingConfirmedScreen()),
@@ -102,13 +242,21 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic price calculation
     int seatCount = BookingManager.selectedSeats.length;
     double baseFare = seatCount * _pricePerSeat;
     double amenityFee = seatCount * 120.0;
     double taxes = (baseFare + amenityFee) * 0.18; // 18% GST
-    double discount = -50.0;
+
+    // Calculate dynamic discount
+    double discount = 0.0;
+    if (BookingManager.appliedPromoCode == 'WEEKEND30') {
+      discount = -(baseFare * 0.3);
+    } else if (BookingManager.appliedPromoCode == 'FIRSTCLASS') {
+      discount = -150.0;
+    }
+
     double totalPayable = baseFare + amenityFee + taxes + discount;
+    if (totalPayable < 0) totalPayable = 0;
 
     final String dateString = "${BookingManager.departureDate.day} ${_getMonthName(BookingManager.departureDate.month)}";
     final routeText = "${BookingManager.fromCity} to ${BookingManager.toCity}";
@@ -117,12 +265,12 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Secure Checkout',
-          style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700),
+          style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -134,7 +282,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.only(
               top: 16,
-              bottom: 160, // Space for footer CTA
+              bottom: 160,
               left: 24,
               right: 24,
             ),
@@ -204,7 +352,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
             style: GoogleFonts.manrope(
               fontSize: 10,
               fontWeight: FontWeight.w800,
-              color: AppColors.primaryLight,
+              color: AppColors.primary,
               letterSpacing: 0.8,
             ),
           ),
@@ -214,7 +362,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           Text(
@@ -233,12 +381,87 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
           _buildFareRow('Premium Amenity Fee', '₹${amenity.round()}'),
           const SizedBox(height: 8),
           _buildFareRow('Taxes & GST (18%)', '₹${taxes.round()}'),
-          const SizedBox(height: 8),
-          _buildFareRow('Promotional Discount', '-₹${discount.abs().round()}', isDiscount: true),
+          
+          if (BookingManager.appliedPromoCode.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildFareRow('Promo Discount (${BookingManager.appliedPromoCode})', '-₹${discount.abs().round()}', isDiscount: true),
+          ],
+          
           const SizedBox(height: 16),
           const Divider(color: AppColors.outline),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
+          // Coupon application input/status row
+          if (BookingManager.appliedPromoCode.isEmpty)
+            InkWell(
+              onTap: _showPromoCodesSelectorSheet,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.local_offer, color: AppColors.primary, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Apply Coupon / Promo Code',
+                          style: GoogleFonts.manrope(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right, color: AppColors.primary, size: 16),
+                  ],
+                ),
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.tertiary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.tertiary.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: AppColors.tertiary, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Promo "${BookingManager.appliedPromoCode}" Applied',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.tertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        BookingManager.appliedPromoCode = '';
+                      });
+                    },
+                    child: const Icon(Icons.close, color: AppColors.textSecondary, size: 16),
+                  ),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -247,7 +470,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                 ),
               ),
               Text(
@@ -281,7 +504,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
           style: GoogleFonts.manrope(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isDiscount ? AppColors.tertiary : Colors.white,
+            color: isDiscount ? AppColors.tertiary : AppColors.textPrimary,
           ),
         ),
       ],
@@ -303,16 +526,17 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
         ),
         const SizedBox(height: 12),
 
-        // UPI Toggle
+        // UPI Option
         _buildPaymentOption(
           id: 'UPI',
           icon: Icons.account_balance_wallet_outlined,
           title: 'UPI (GPay, PhonePe, BHIM)',
           desc: 'Instant checkout using secure UPI app',
+          expandChild: _selectedMethod == 'UPI' ? _buildUPIForm() : null,
         ),
         const SizedBox(height: 12),
 
-        // Card Toggle
+        // Card Option
         _buildPaymentOption(
           id: 'CARD',
           icon: Icons.credit_card_outlined,
@@ -322,12 +546,13 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Net Banking
+        // Net Banking Option
         _buildPaymentOption(
           id: 'NET',
           icon: Icons.account_balance_outlined,
           title: 'Net Banking',
           desc: 'All major Indian banks supported',
+          expandChild: _selectedMethod == 'NET' ? _buildNetBankingForm() : null,
         ),
       ],
     );
@@ -358,7 +583,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
             ),
             child: Row(
               children: [
-                Icon(icon, color: isSelected ? AppColors.primaryLight : AppColors.textSecondary),
+                Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -369,7 +594,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
                         style: GoogleFonts.manrope(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
@@ -384,7 +609,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
                 ),
                 Icon(
                   isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                  color: isSelected ? AppColors.primaryLight : AppColors.textSecondary,
+                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
                   size: 20,
                 )
               ],
@@ -396,7 +621,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
     );
   }
 
-  Widget _buildCardForm() {
+  Widget _buildUPIForm() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -405,12 +630,39 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
         border: Border.all(color: AppColors.primary),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: ['GPay', 'PhonePe', 'Paytm', 'BHIM'].map((app) {
+              bool isSelected = _selectedUPIApp == app;
+              return ChoiceChip(
+                label: Text(app),
+                selected: isSelected,
+                selectedColor: AppColors.primary,
+                backgroundColor: AppColors.background,
+                labelStyle: GoogleFonts.manrope(
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+                onSelected: (val) {
+                  if (val) {
+                    setState(() {
+                      _selectedUPIApp = app;
+                      _upiIdController.text = 'alex.morgan@ok${app.toLowerCase()}';
+                    });
+                  }
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
           TextField(
-            controller: _cardController,
-            style: GoogleFonts.manrope(color: Colors.white, fontSize: 14),
+            controller: _upiIdController,
+            style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 14),
             decoration: InputDecoration(
-              labelText: 'CARD NUMBER',
+              labelText: 'ENTER UPI ID',
               labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
               filled: true,
               fillColor: AppColors.background,
@@ -418,41 +670,205 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
               focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
             ),
           ),
-          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardForm() {
+    final bool hasSavedCards = BookingManager.savedCards.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+        border: Border.all(color: AppColors.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasSavedCards && !_payWithNewCard) ...[
+            Text(
+              'SELECT SAVED CARD',
+              style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.outline),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.credit_card, color: AppColors.primary),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Visa ending in ${BookingManager.savedCards.first.substring(BookingManager.savedCards.first.length - 4)}',
+                        style: GoogleFonts.manrope(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  const Icon(Icons.check_circle, color: AppColors.tertiary, size: 20),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _savedCvvController,
+              obscureText: true,
+              keyboardType: TextInputType.number,
+              style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 14),
+              decoration: InputDecoration(
+                labelText: 'ENTER CVV',
+                labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
+                filled: true,
+                fillColor: AppColors.background,
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.outline)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _payWithNewCard = true;
+                  });
+                },
+                child: Text(
+                  'Pay with another card',
+                  style: GoogleFonts.manrope(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ] else ...[
+            TextField(
+              controller: _cardController,
+              keyboardType: TextInputType.number,
+              style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 14),
+              decoration: InputDecoration(
+                labelText: 'CARD NUMBER',
+                labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
+                filled: true,
+                fillColor: AppColors.background,
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.outline)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _expiryController,
+                    style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 14),
+                    decoration: InputDecoration(
+                      labelText: 'EXPIRY',
+                      labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.outline)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _cvvController,
+                    obscureText: true,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 14),
+                    decoration: InputDecoration(
+                      labelText: 'CVV',
+                      labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.outline)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              title: Text('Save card for future payments', style: GoogleFonts.manrope(color: AppColors.textPrimary, fontSize: 13)),
+              activeColor: AppColors.primary,
+              value: _saveCardForFuture,
+              contentPadding: EdgeInsets.zero,
+              onChanged: (v) {
+                setState(() {
+                  _saveCardForFuture = v;
+                });
+              },
+            ),
+            if (hasSavedCards)
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _payWithNewCard = false;
+                    });
+                  },
+                  child: Text(
+                    'Use saved card',
+                    style: GoogleFonts.manrope(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+          ]
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNetBankingForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+        border: Border.all(color: AppColors.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _expiryController,
-                  style: GoogleFonts.manrope(color: Colors.white, fontSize: 14),
-                  decoration: InputDecoration(
-                    labelText: 'EXPIRY',
-                    labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.outline)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
-                  ),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: ['SBI', 'HDFC', 'ICICI', 'AXIS'].map((bank) {
+              bool isSelected = _selectedBank == bank;
+              return ChoiceChip(
+                label: Text(bank),
+                selected: isSelected,
+                selectedColor: AppColors.primary,
+                backgroundColor: AppColors.background,
+                labelStyle: GoogleFonts.manrope(
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _cvvController,
-                  obscureText: true,
-                  style: GoogleFonts.manrope(color: Colors.white, fontSize: 14),
-                  decoration: InputDecoration(
-                    labelText: 'CVV',
-                    labelStyle: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.outline)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
-                  ),
-                ),
-              ),
-            ],
-          )
+                onSelected: (val) {
+                  if (val) {
+                    setState(() {
+                      _selectedBank = bank;
+                    });
+                  }
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'You will be redirected to the secure portal of $_selectedBank to complete authorization.',
+            style: GoogleFonts.manrope(color: AppColors.textSecondary, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -471,7 +887,7 @@ class _SecureCheckoutScreenState extends State<SecureCheckoutScreen> {
           border: Border.all(color: AppColors.outline),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),

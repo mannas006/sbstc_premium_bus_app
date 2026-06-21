@@ -14,7 +14,7 @@ class SBSTCPremiumBusApp extends StatelessWidget {
     return MaterialApp(
       title: 'SBSTC Premium Bus',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       home: const SplashScreen(),
     );
   }

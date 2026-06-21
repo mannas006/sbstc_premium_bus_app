@@ -126,7 +126,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -134,7 +134,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
           children: [
             Text(
               'Select Seats',
-              style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700),
+              style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
             Text(
               routeText,
@@ -178,7 +178,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                             style: GoogleFonts.spaceGrotesk(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           Text(
@@ -363,9 +363,9 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
     bool isBooked = seat.status == SeatStatus.booked;
     bool isLadies = seat.status == SeatStatus.ladies;
 
-    Color bgColor = AppColors.background;
+    Color bgColor = AppColors.surface;
     Color borderColor = AppColors.outline;
-    Color textColor = AppColors.textSecondary;
+    Color textColor = AppColors.textPrimary;
     Widget? icon;
 
     if (isSelected) {
@@ -421,7 +421,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
           border: Border.all(color: AppColors.outline),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -451,7 +451,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],

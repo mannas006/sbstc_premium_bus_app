@@ -82,7 +82,7 @@ class BookingConfirmedScreen extends StatelessWidget {
           style: GoogleFonts.spaceGrotesk(
             fontSize: 28,
             fontWeight: FontWeight.w800,
-            color: Colors.white,
+            color: AppColors.textPrimary,
             letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,
@@ -109,7 +109,7 @@ class BookingConfirmedScreen extends StatelessWidget {
         border: Border.all(color: AppColors.outline),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -144,7 +144,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -152,16 +152,16 @@ class BookingConfirmedScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.15),
+                    color: AppColors.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                   ),
                   child: Text(
                     'CONFIRMED',
                     style: GoogleFonts.manrope(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.primaryLight,
+                      color: AppColors.primary,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -188,7 +188,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           booking['departureTime'] ?? '08:30',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+                          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                         ),
                         Text(
                           booking['from'] ?? 'Kolkata',
@@ -196,7 +196,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Icon(Icons.arrow_forward, color: AppColors.primaryLight),
+                    const Icon(Icons.arrow_forward, color: AppColors.primary),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -207,7 +207,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           booking['arrivalTime'] ?? '11:45',
-                          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+                          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                         ),
                         Text(
                           booking['to'] ?? 'Durgapur',
@@ -235,7 +235,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           booking['date'] ?? '24 Oct 2026',
-                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                         ),
                       ],
                     ),
@@ -249,7 +249,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           booking['seat'] ?? '04A',
-                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                         ),
                       ],
                     ),
@@ -265,6 +265,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.outline),
                       ),
                       child: Container(
                         width: 140,
@@ -397,10 +398,10 @@ class BookingConfirmedScreen extends StatelessWidget {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: AppColors.surface,
+                    backgroundColor: AppColors.primary,
                     content: Text(
                       'Ticket shared successfully!',
-                      style: GoogleFonts.manrope(color: Colors.white),
+                      style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                   ),
                 );
@@ -409,14 +410,14 @@ class BookingConfirmedScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.share, color: Colors.white, size: 18),
+                  const Icon(Icons.share, color: AppColors.textPrimary, size: 18),
                   const SizedBox(width: 8),
                   Text(
                     'Share Pass',
                     style: GoogleFonts.manrope(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],

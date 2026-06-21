@@ -74,12 +74,12 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Passenger Details',
-          style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700),
+          style: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -138,11 +138,11 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
           children: [
             Text(
               'Enter Traveler Info',
-              style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
+              style: GoogleFonts.spaceGrotesk(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
             Text(
               'STEP 2 OF 3',
-              style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primaryLight),
+              style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primary),
             ),
           ],
         ),
@@ -236,7 +236,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primaryLight,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -251,7 +251,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
                     style: GoogleFonts.manrope(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -288,7 +288,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
             style: GoogleFonts.manrope(
               fontSize: 10,
               fontWeight: FontWeight.w800,
-              color: AppColors.primaryLight,
+              color: AppColors.primary,
               letterSpacing: 0.8,
             ),
           ),
@@ -374,13 +374,13 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      style: GoogleFonts.manrope(fontSize: 15, color: Colors.white),
+      style: GoogleFonts.manrope(fontSize: 15, color: AppColors.textPrimary),
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-        floatingLabelStyle: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryLight),
-        prefixIcon: Icon(icon, color: AppColors.primaryLight, size: 18),
+        floatingLabelStyle: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+        prefixIcon: Icon(icon, color: AppColors.primary, size: 18),
         filled: true,
         fillColor: AppColors.background,
         enabledBorder: OutlineInputBorder(
@@ -409,12 +409,12 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
       value: _gender,
       icon: const Icon(Icons.expand_more, color: AppColors.textSecondary),
       dropdownColor: AppColors.surface,
-      style: GoogleFonts.manrope(fontSize: 15, color: Colors.white),
+      style: GoogleFonts.manrope(fontSize: 15, color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: 'GENDER',
         labelStyle: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-        floatingLabelStyle: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryLight),
-        prefixIcon: const Icon(Icons.wc_outlined, color: AppColors.primaryLight, size: 18),
+        floatingLabelStyle: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+        prefixIcon: const Icon(Icons.wc_outlined, color: AppColors.primary, size: 18),
         filled: true,
         fillColor: AppColors.background,
         enabledBorder: OutlineInputBorder(
@@ -463,7 +463,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
                 style: GoogleFonts.manrope(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primaryLight,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -472,7 +472,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                 ),
               ),
               Text(
@@ -495,7 +495,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
               style: GoogleFonts.manrope(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primaryLight,
+                color: AppColors.primary,
               ),
             ),
           )
@@ -517,7 +517,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
         children: [
           Row(
             children: [
-              const Icon(Icons.restaurant, color: AppColors.primaryLight),
+              const Icon(Icons.restaurant, color: AppColors.primary),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -527,7 +527,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
                     style: GoogleFonts.manrope(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
@@ -570,7 +570,7 @@ class _PassengerInformationScreenState extends State<PassengerInformationScreen>
           border: Border.all(color: AppColors.outline),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
